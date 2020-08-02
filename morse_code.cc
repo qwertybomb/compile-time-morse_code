@@ -59,15 +59,15 @@ namespace morse
     auto constexpr encode()
     {
         /* std::toupper is not constexpr */
-        auto constexpr to_upper = [](auto const& ch) { return (L'a' < ch && ch < L'z') ?  ch - 32 : ch; };
+        auto constexpr to_upper = [](auto const& ch) { return (L'a' < ch && ch < L'z') ?  ch - (L'a' - L'A') : ch; };
 
         auto constexpr find_letter_index = [](auto const& ch) {
             /* if char is a ' ' use the index for '_' */
-            return std::distance(decode_map.buf, std::find(decode_map.buf, decode_map.buf + 129, ch));
+            return std::distance(decode_map.buf, std::find(decode_map.buf, decode_map.buf + decode_map.size(), ch));
         };
 
         auto constexpr letter_length = [](auto const &ch) {
-            std::size_t letter_index = std::distance(decode_map.buf, std::find(decode_map.buf, decode_map.buf + 129, ch));
+            std::size_t letter_index = std::distance(decode_map.buf, std::find(decode_map.buf, decode_map.buf + decode_map.size(), ch));
             std::size_t result = 0;
             for(;letter_index; --letter_index /= 2) result++;
             return result;
@@ -122,7 +122,7 @@ namespace morse
             /* go over ' ' */
             ++read_index;
             /* if char was not found replace it with a space */
-            ch = current_index > 129 ? L' ' : decode_map[current_index - 1];
+            ch = current_index > decode_map.size() ? L' ' : decode_map[current_index - 1];
         }
         return result;
     }
